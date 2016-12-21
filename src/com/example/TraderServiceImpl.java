@@ -20,6 +20,11 @@ public class TraderServiceImpl implements TraderService {
             e.printStackTrace();
         }
         Stock stock = stocks.get(stockName);
+        try {
+            Thread.sleep(2000l);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         if (stock == null) {
             Stock stock2 = new Stock(stockName, numShares, price);
             stocks.put(stockName, stock2);
@@ -60,6 +65,11 @@ public class TraderServiceImpl implements TraderService {
 
     @Override
     public List<Trade> getTrades() {
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return trades;
     }
 }
