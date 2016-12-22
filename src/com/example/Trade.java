@@ -27,7 +27,7 @@ public class Trade extends Stock {
     public String toString() {
         return "Trade{" +
                 "personName='" + personName + '\'' +
-                ", dateTime=" + dateTime +
+                ", dateTime=" + dateTime + super.toString()+
                 '}';
     }
 }

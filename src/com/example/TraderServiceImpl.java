@@ -4,6 +4,7 @@ import sun.plugin2.message.Message;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by LunaFlores on 12/21/16.
@@ -11,50 +12,67 @@ import java.util.*;
 public class TraderServiceImpl implements TraderService {
     private Map<String, Stock> stocks = new HashMap<>();
     private List<Trade> trades = new ArrayList<>();
+    private ReentrantLock lock = new ReentrantLock();
 
     @Override
-    public synchronized void addShares(String stockName, int numShares, int price) {
+    public void addShares(String stockName, int numShares, int price) {
         try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            lock.lock();
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Stock stock = stocks.get(stockName);
+            try {
+                Thread.sleep(2000l);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if (stock == null) {
+                Stock stock2 = new Stock(stockName, numShares, price);
+                stocks.put(stockName, stock2);
+            } else {
+                int newShares = stock.getShares() + numShares;
+                Stock stock2 = new Stock(stockName, newShares, price);
+                stocks.put(stockName, stock2);
+            }
+        } finally {
+            lock.unlock();
         }
-        Stock stock = stocks.get(stockName);
-        try {
-            Thread.sleep(2000l);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        if (stock == null) {
-            Stock stock2 = new Stock(stockName, numShares, price);
-            stocks.put(stockName, stock2);
-        } else {
-            int newShares = stock.getShares() + numShares;
-            Stock stock2 = new Stock(stockName, newShares, price);
-            stocks.put(stockName, stock2);
-        }
+
+
     }
 
     @Override
-    public synchronized Stock getStock(String stockName) {
-        return stocks.get(stockName);
+    public Stock getStock(String stockName) {
+        try {
+            lock.lock();
+            Stock stock = stocks.get(stockName);
+            return stock;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
     public Trade buyShares(String traderName, String sockName, int numShares, int price) throws SharesException {
-        synchronized (this) {
+        try {
+            lock.lock();
             Stock stock = stocks.get(sockName);
             int newShares = stock.getShares() - numShares;
-            if (stock == null){
+            if (stock == null) {
                 throw new SharesException();
             }
             if (stock.getShares() > numShares) {
                 Stock stock2 = new Stock(sockName, price, newShares);
                 stocks.put(sockName, stock2);
             } else throw new SharesException();
+        } finally {
+            lock.unlock();
         }
-            Trade trade = new Trade(sockName,price,numShares,traderName, LocalDate.now());
-            trades.add(trade);
+        Trade trade = new Trade(sockName, price, numShares, traderName, LocalDate.now());
+        trades.add(trade);
         return trade;
     }
 

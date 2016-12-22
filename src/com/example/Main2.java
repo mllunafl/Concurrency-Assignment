@@ -23,9 +23,11 @@ public class Main2 {
         Thread thread5 = new Thread(buyShares);
         thread5.start();
 
-        while (traderService.getTrades().size() < 5 ){
+
+
+        while (traderService.getTrades().size() != 1 ){
             System.out.println(traderService.getTrades());
         }
-
+        System.out.println(traderService.getTrades());
     }
 }
